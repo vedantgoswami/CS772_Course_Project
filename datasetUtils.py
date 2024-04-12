@@ -6,27 +6,65 @@ def load_json(file_path):
         data = json.load(file)
     return data
 
-file_path = "/raid/ganesh/nagakalyani/nagakalyani/autograding/huggingface_codellama/AiSight/train.json"
-data = load_json(file_path)
+file_path1 = "/raid/ganesh/nagakalyani/nagakalyani/autograding/huggingface_codellama/AiSight/train.json"
+file_path2 = "/raid/ganesh/nagakalyani/nagakalyani/autograding/huggingface_codellama/AiSight/test.json"
+file_path3 = "/raid/ganesh/nagakalyani/nagakalyani/autograding/huggingface_codellama/AiSight/validation.json"
 
-X = []
-Y = []
-for d in data:
-    X.append(d['tokens'])
-    Y.append(d['ner_tags'])
+train_data = load_json(file_path1)
+test_data = load_json(file_path2)
+valid_data = load_json(file_path3)
+
+X_train = []
+Y_train = []
+
+X_temp = []
+Y_temp = []
+for d in train_data:
+    X_temp.append(d['tokens'])
+    Y_temp.append(d['ner_tags'])
+
+count_all_O=0
+
+for i,sentence in enumerate(Y_temp):
+    if(sum(sentence)==len(sentence)*6):
+        count_all_O+=1
+    else:
+        X_train.append(X_temp[i])
+        Y_train.append(sentence)
+
+X_test = []
+Y_test = []
+for d in test_data:
+    X_test.append(d['tokens'])
+    Y_test.append(d['ner_tags'])
+
+X_valid = []
+Y_valid = []
+for d in valid_data:
+    X_valid.append(d['tokens'])
+    Y_valid.append(d['ner_tags'])
 
 # Combine X and Y into a single list of dictionaries
-data = [{'tokens': x, 'ner_tags': y} for x, y in zip(X, Y)]
+train_data = [{'tokens': x, 'ner_tags': y} for x, y in zip(X_train, Y_train)]
+print(len(train_data))
+
+# Combine X and Y into a single list of dictionaries
+test_data = [{'tokens': x, 'ner_tags': y} for x, y in zip(X_test, Y_test)]
+print(len(test_data))
+
+# Combine X and Y into a single list of dictionaries
+val_data = [{'tokens': x, 'ner_tags': y} for x, y in zip(X_valid, Y_valid)]
+print(len(val_data))
 
 # Splitting the data into train (60%), validation (20%), and test (20%)
-train_size = int(0.6 * len(data))
-val_size = int(0.2 * len(data))
-test_size = len(data) - train_size - val_size
+# train_size = int(0.6 * len(data))
+# val_size = int(0.2 * len(data))
+# test_size = len(data) - train_size - val_size
 
-# Splitting the data into train, validation, and test sets
-train_data = data[:train_size]
-val_data = data[train_size:train_size + val_size]
-test_data = data[train_size + val_size:]
+# # Splitting the data into train, validation, and test sets
+# train_data = data[:train_size]
+# val_data = data[train_size:train_size + val_size]
+# test_data = data[train_size + val_size:]
 
 train_data_dict= {
                     'tokens': [],

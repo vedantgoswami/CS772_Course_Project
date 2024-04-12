@@ -20,7 +20,10 @@ test_data = dataset_dict['test']
 
 tokenized_datasets = dataset_dict.map(tokenize_and_align_labels, batched=True)
 
-model = AutoModelForTokenClassification.from_pretrained("l3cube-pune/hindi-bert-v2",num_labels=7,device_map="cuda:0")
+# Here we have correct values in it
+# print(tokenized_datasets['train'])
+
+model = AutoModelForTokenClassification.from_pretrained("l3cube-pune/hindi-bert-v2",num_labels=7,device_map="cuda:1")
 
 from transformers import TrainingArguments, Trainer 
 args = TrainingArguments(
@@ -31,6 +34,7 @@ args = TrainingArguments(
     per_device_eval_batch_size=16, 
     num_train_epochs=3, 
     weight_decay=0.01, 
+    label_smoothing_factor=0.2
 ) 
 
 data_collator = DataCollatorForTokenClassification(tokenizer) 
@@ -62,9 +66,9 @@ def compute_metrics(eval_preds):
     A dictionary containing the precision, recall, F1 score and accuracy.
     """
     pred_logits, labels = eval_preds 
-    print(pred_logits)
-    print(labels)
+    
     pred_logits = np.argmax(pred_logits, axis=2) 
+    
     # the logits and the probabilities are in the same order,
     # so we don’t need to apply the softmax
     
@@ -73,12 +77,11 @@ def compute_metrics(eval_preds):
         [label_list[str(eval_preds)] for (eval_preds, l) in zip(prediction, label) if l != -100] 
         for prediction, label in zip(pred_logits, labels) 
     ]
-    print(predictions)
     
     true_labels = [ 
       [label_list[str(l)] for (eval_preds, l) in zip(prediction, label) if l != -100] 
        for prediction, label in zip(pred_logits, labels) 
-   ] 
+   ]
     results = metric.compute(predictions=predictions, references=true_labels) 
     return { 
    "precision": results["overall_precision"], 
