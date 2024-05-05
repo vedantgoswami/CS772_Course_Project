@@ -38,7 +38,7 @@ def main():
     # Input fields for sentence
     sentence = st.text_area("Enter the sentence:")
     # pos_list = st.text_area("Enter POS Tags (space-separated):")
-    ner_model = NER("/tokenizer", "/ner_model")
+    ner_model = NER("Vedantg68/HiNER_CS772", "Vedantg68/HiNER_Tokenizer")
     # Button to submit and trigger the prediction
     if st.button("Submit"):
         # Tokenize the input
